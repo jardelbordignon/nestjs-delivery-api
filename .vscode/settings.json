@@ -1,0 +1,18 @@
+{
+  "files.eol": "\n",
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.insertFinalNewline": true,
+    "source.formatDocument": true,
+    "source.fixAll.eslint": true
+  },
+  "material-icon-theme.activeIconPack": "nest",
+  "material-icon-theme.files.associations": {
+    "*.dto.ts": "Nest-resolver"
+  },
+  "material-icon-theme.folders.associations": {
+    "infra": "Tools"
+  }
+}
