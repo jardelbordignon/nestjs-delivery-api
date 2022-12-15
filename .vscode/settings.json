@@ -13,6 +13,7 @@
     "*.dto.ts": "Nest-resolver"
   },
   "material-icon-theme.folders.associations": {
+    "requests": "Connection",
     "infra": "Tools"
   }
 }
