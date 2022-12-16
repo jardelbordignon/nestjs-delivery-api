@@ -14,6 +14,7 @@
   },
   "material-icon-theme.folders.associations": {
     "requests": "Connection",
-    "infra": "Tools"
+    "infra": "Tools",
+    "account": "Secure"
   }
 }
