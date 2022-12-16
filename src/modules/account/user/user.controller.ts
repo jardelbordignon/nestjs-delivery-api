@@ -3,16 +3,16 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import type { User } from '@prisma/client'
 
 import { CreateUserBody } from './user.dto'
-import { UserService } from './user.service'
+import { type UserOmittedPassword, UserService } from './user.service'
 
 @ApiBearerAuth()
-@ApiTags('Account/User')
+@ApiTags('Account - User')
 @Controller('users')
 export class UserController {
   constructor(private readonly service: UserService) {}
 
   @Get()
-  findAll(): Promise<User[]> {
+  findAll(): Promise<UserOmittedPassword[]> {
     return this.service.findAll()
   }
 
