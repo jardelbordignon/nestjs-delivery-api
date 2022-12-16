@@ -11,8 +11,8 @@ import {
 import { PrismaService } from '../prisma.service'
 
 type Props = ValidationOptions & {
-  table: string
-  field?: string
+  model: string
+  property?: string
 }
 
 @ValidatorConstraint({ async: true })
@@ -22,30 +22,30 @@ class isExistingValidator
 {
   async validate(_: any, args: ValidationArguments) {
     const { property, value, constraints } = args
-    const { table, field, reverse } = constraints[0]
+    const { model, field, reverse } = constraints[0]
 
-    const fieldName = field || property
+    const propertyName = field || property
 
-    // console.log('table', table)
-    // console.log('field', fieldName)
+    // console.log('model', model)
+    // console.log('property', propertyName)
     // console.log('value', value)
     // console.log('reverse', reverse)
 
-    const register = await this[table].findFirst({ where: { [fieldName]: value } })
+    const register = await this[model].findFirst({ where: { [propertyName]: value } })
     //console.log('register', register)
 
     return reverse ? !register : !!register
   }
 }
 
-export function IsExisting({ table, field, ...rest }: Props) {
+export function IsExisting({ model, property, ...rest }: Props) {
   const options = rest || {}
 
   if (!options.message) {
     Object.assign(options, { message: "$property '$value' not exists" })
   }
 
-  const data = { table, field, reverse: false }
+  const data = { model, field: property, reverse: false }
 
   return function (object: Object, propertyName: string) {
     registerDecorator({
@@ -58,14 +58,14 @@ export function IsExisting({ table, field, ...rest }: Props) {
   }
 }
 
-export function IsUnique({ table, field, ...rest }: Props) {
+export function IsUnique({ model, property, ...rest }: Props) {
   const options = rest || {}
 
   if (!options.message) {
     Object.assign(options, { message: "$property '$value' already exists" })
   }
 
-  const data = { table, field, reverse: true }
+  const data = { model, field: property, reverse: true }
 
   return function (object: Object, propertyName: string) {
     registerDecorator({
