@@ -16,15 +16,17 @@ enum Role {
   CLIENT
 }
 
+// ACCOUNT
 model User {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   name        String
-  email       String   @unique
+  email       String    @unique
   password    String
-  roles       Role[]   @default([CLIENT])
+  roles       Role[]    @default([CLIENT])
   permissions String[]
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  addresses   Address[]
 
   @@map("users")
 }
@@ -36,4 +38,25 @@ model Token {
   expires_at    DateTime
 
   @@map("tokens")
+}
+
+model Address {
+  id           String   @id @default(uuid())
+  user_id      String
+  user         User     @relation(fields: [user_id], references: [id])
+  type         String // payment | shipping
+  full_name    String
+  phone        String
+  postal_code  String
+  country      String
+  state        String
+  city         String
+  neighborhood String
+  street       String
+  number       String
+  complement   String
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  @@map("addresses")
 }
