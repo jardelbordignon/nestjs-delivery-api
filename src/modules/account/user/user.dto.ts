@@ -1,8 +1,15 @@
 // https://stackoverflow.com/questions/58343262/class-validator-validate-array-of-objects
 
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, PartialType } from '@nestjs/swagger'
 import type { Role, User } from '@prisma/client'
-import { IsEmail, IsString, Length, Matches } from 'class-validator'
+import {
+  IsEmail,
+  IsString,
+  IsUUID,
+  Length,
+  Matches,
+  ValidateIf,
+} from 'class-validator'
 
 import { IsUnique } from 'src/infra/utils/custom-class-validator'
 
@@ -25,6 +32,7 @@ export class CreateUserBody
 
   @ApiProperty({ example: 'Abc-123!' })
   @IsString()
+  @Length(6, 30)
   @Matches(regex, { message: regexMsg })
   password: string
 
@@ -35,4 +43,13 @@ export class CreateUserBody
   @ApiProperty({ example: ['user.create', 'user.update'] })
   @IsString({ each: true })
   permissions: string[]
+}
+
+export class UpdateUserBody extends PartialType(CreateUserBody) {
+  @IsUUID()
+  id: string
+
+  @IsString()
+  @ValidateIf(user => !!user.email || !!user.password)
+  currentPassword: string
 }

@@ -5,9 +5,19 @@ POST http://localhost:3000/users
 content-type: application/json
 
 {
-  "name": "John Doe",
-  "email": "john-doe@email.com",
-  "password": "Aa123456",
+  "name": "Jardel",
+  "email": "jardel@email.com",
+  "password": "Pwd123!",
   "roles": ["CLIENT"],
   "permissions": ["user.create", "user.update"]
+}
+
+###
+PATCH http://localhost:3000/users
+content-type: application/json
+
+{
+  "id": "90e39d77-aa37-4d48-adf6-1cbc196c2af4",
+  "email": "jardel@email.com",
+  "currentPassword": "Pwd123!"
 }
