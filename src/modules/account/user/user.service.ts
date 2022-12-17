@@ -1,12 +1,19 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
-import type { User } from '@prisma/client'
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common'
+import type { Address, User } from '@prisma/client'
 import { compare, hash } from 'bcryptjs'
 
 import { PrismaService } from 'src/infra/prisma.service'
 import { omitProperties } from 'src/infra/utils/omit-properties'
 
 import {
+  CreateAddressInput,
   CreateUserInput,
+  UpdateAddressInput,
   UpdateUserInput,
   type UserOmittedPassword,
 } from './user.dto'
@@ -72,5 +79,98 @@ export class UserService extends PrismaService {
     })
 
     return omitProperties(updatedUser, ['password'])
+  }
+
+  // Addresses
+  async findUserAddresses(user_id: string): Promise<Address[]> {
+    return this.address.findMany({ where: { user_id } })
+  }
+
+  async createUserAddress(
+    user_id: string,
+    data: CreateAddressInput
+  ): Promise<Address> {
+    const {
+      city,
+      complement,
+      country,
+      full_name,
+      neighborhood,
+      number,
+      phone,
+      postal_code,
+      state,
+      street,
+      type,
+    } = data
+
+    const alreadyExists = await this.address.findFirst({
+      where: { user_id, street, number },
+    })
+
+    if (alreadyExists) throw new BadRequestException('Address already exists')
+
+    const address = await this.address.create({
+      data: {
+        user_id,
+        city,
+        complement,
+        country,
+        full_name,
+        neighborhood,
+        number,
+        phone,
+        postal_code,
+        state,
+        street,
+        type,
+      },
+    })
+
+    return address
+  }
+
+  async deleteUserAddress(id: string): Promise<boolean> {
+    const deletedAddress = await this.address.delete({ where: { id } })
+    return !!deletedAddress
+  }
+
+  async updateUserAddress(data: UpdateAddressInput): Promise<Address> {
+    const {
+      id,
+      city,
+      complement,
+      country,
+      full_name,
+      neighborhood,
+      number,
+      phone,
+      postal_code,
+      state,
+      street,
+      type,
+    } = data
+
+    const addressExists = await this.address.findFirst({ where: { id } })
+    if (!addressExists) throw new NotFoundException('Address not found')
+
+    const updatedAddress = this.address.update({
+      where: { id },
+      data: {
+        city,
+        complement,
+        country,
+        full_name,
+        neighborhood,
+        number,
+        phone,
+        postal_code,
+        state,
+        street,
+        type,
+      },
+    })
+
+    return updatedAddress
   }
 }

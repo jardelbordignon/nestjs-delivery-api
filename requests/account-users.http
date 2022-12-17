@@ -21,3 +21,42 @@ content-type: application/json
   "email": "jardel@email.com",
   "currentPassword": "Pwd123!"
 }
+
+
+###
+// List user addresses
+GET http://localhost:3000/users/addresses
+
+###
+// Add address
+POST http://localhost:3000/users/addresses
+content-type: application/json
+
+{
+  "type": "shipping",
+  "full_name": "John Doe",
+  "phone": "(54) 9 9123-4567",
+  "postal_code": "99500-000",
+  "country": "Brasil",
+  "state": "RS",
+  "city": "Carazinho",
+  "neighborhood": "Conceição",
+  "street": "Rua Parecis",
+  "number": "320",
+  "complement": "Em frente a VM Pneus"
+}
+
+###
+// Update address
+PATCH http://localhost:3000/users/addresses
+content-type: application/json
+
+{
+  "id": "ecd05cd8-46b4-4df7-8c98-39f0d5c4f66f",
+  "full_name": "Jardel Bordignon"
+}
+
+
+###
+// Delete address
+DELETE http://localhost:3000/users/addresses/ecd05cd8-46b4-4df7-8c98-39f0d5c4f66f
