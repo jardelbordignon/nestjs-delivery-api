@@ -30,7 +30,7 @@ export class CreateUserBody
   @IsUnique({ model: 'User' })
   email: string
 
-  @ApiProperty({ example: 'Abc-123!' })
+  @ApiProperty({ example: 'Pwd@123!', writeOnly: true })
   @IsString()
   @Length(6, 30)
   @Matches(regex, { message: regexMsg })

@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { User } from '@prisma/client'
+import { compare, hash } from 'bcryptjs'
 
 import { PrismaService } from 'src/infra/prisma.service'
 import { omitProperties } from 'src/infra/utils/omit-properties'
@@ -18,6 +19,7 @@ export class UserService extends PrismaService {
   }
 
   async create(data: CreateUserBody): Promise<UserOmittedPassword> {
+    data.password = await hash(data.password, 10)
     const user = await this.user.create({ data })
     return omitProperties(user, ['password'])
   }
@@ -29,9 +31,8 @@ export class UserService extends PrismaService {
     const user = await this.user.findFirst({ where: { id } })
 
     if (email || password) {
-      const passwordsMatch = currentPassword === user.password
-      if (!passwordsMatch)
-        throw new UnauthorizedException('Incorrect current password')
+      const match = await compare(currentPassword, user.password)
+      if (!match) throw new UnauthorizedException('Incorrect current password')
     }
 
     const updatedUser = await this.user.update({
