@@ -1,0 +1,45 @@
+###
+// login
+POST http://localhost:3000/auth
+content-type: application/json
+
+{
+  "email": "jardel@email.com",
+  "password": "Senha123!"
+}
+
+
+###
+// logout
+DELETE http://localhost:3000/auth/795bf123-b9b0-465d-98fc-f6901d67c4e4
+
+
+###
+// refresh_tokens
+POST http://localhost:3000/auth/refresh_tokens
+content-type: application/json
+
+{
+  "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI3OTViZjEyMy1iOWIwLTQ2NWQtOThmYy1mNjkwMWQ2N2M0ZTQiLCJpYXQiOjE2NzEyOTczMjAsImV4cCI6MTY3MjE2MTMyMH0.RJVStZAiNo-v9EFXcWJehswt1yKz1mVw1WnUhicjXCI"
+}
+
+
+###
+// reset_password
+POST http://localhost:3000/auth/reset_password
+content-type: application/json
+
+{
+  "refresh_token": "8274b3ba-5e6d-4816-ac2d-129afb450dba",
+  "password": "Senha123!"
+}
+
+
+###
+// reset_password
+POST http://localhost:3000/auth/send_reset_password_email
+content-type: application/json
+
+{
+ "email": "jardel@email.com"
+}

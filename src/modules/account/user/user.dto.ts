@@ -13,11 +13,13 @@ import {
 
 import { IsUnique } from 'src/infra/utils/custom-class-validator'
 
+export type UserOmittedPassword = Omit<User, 'password'>
+
 const regex = /^.*(?=.{6,})(?=.*[a-zA-Z])(?=.*\d)(?=.*[!&$%&? "]).*$/
 const regexMsg =
   '$property must contain at least 6 characters, 1 upper and 1 lower case letter, 1 number and special characters !#$%&?'
 
-export class CreateUserBody
+export class CreateUserInput
   implements Omit<User, 'id' | 'created_at' | 'updated_at'>
 {
   @ApiProperty({ example: 'John Doe' })
@@ -45,11 +47,11 @@ export class CreateUserBody
   permissions: string[]
 }
 
-export class UpdateUserBody extends PartialType(CreateUserBody) {
+export class UpdateUserInput extends PartialType(CreateUserInput) {
   @IsUUID()
   id: string
 
   @IsString()
   @ValidateIf(user => !!user.email || !!user.password)
-  currentPassword: string
+  current_password: string
 }
