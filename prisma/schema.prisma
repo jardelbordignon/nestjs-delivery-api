@@ -16,6 +16,11 @@ enum Role {
   CLIENT
 }
 
+enum AddressType {
+  BILLING
+  SHIPPING
+}
+
 // ACCOUNT
 model User {
   id          String    @id @default(uuid())
@@ -41,10 +46,10 @@ model Token {
 }
 
 model Address {
-  id           String   @id @default(uuid())
+  id           String      @id @default(uuid())
   user_id      String
-  user         User     @relation(fields: [user_id], references: [id])
-  type         String // payment | shipping
+  user         User        @relation(fields: [user_id], references: [id])
+  type         AddressType @default(SHIPPING)
   full_name    String
   phone        String
   postal_code  String
@@ -55,8 +60,8 @@ model Address {
   street       String
   number       String
   complement   String
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @updatedAt
 
   @@map("addresses")
 }
