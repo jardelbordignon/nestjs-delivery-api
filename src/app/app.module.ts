@@ -1,4 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
+import { ThrottlerModule } from '@nestjs/throttler'
 import helmet from 'helmet'
 
 //import { LoggerMiddleware } from 'src/infra/middlewares'
@@ -8,7 +9,13 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 
 @Module({
-  imports: [Modules],
+  imports: [
+    ThrottlerModule.forRoot({
+      limit: 3,
+      ttl: 10, // time to live
+    }),
+    Modules,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

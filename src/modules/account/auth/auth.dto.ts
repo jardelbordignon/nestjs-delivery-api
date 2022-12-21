@@ -40,7 +40,7 @@ export class LoginInput {
 
   @ApiProperty({ example: 'Pwd@123!' })
   @IsString()
-  password?: string
+  password: string
 }
 
 export class LogoutInput {

@@ -42,7 +42,7 @@ export function IsExisting({ model, property, ...rest }: Props) {
   const options = rest || {}
 
   if (!options.message) {
-    Object.assign(options, { message: "$property '$value' not exists" })
+    Object.assign(options, { message: '$property $value not exists' })
   }
 
   const data = { model, field: property, reverse: false }
@@ -62,7 +62,7 @@ export function IsUnique({ model, property, ...rest }: Props) {
   const options = rest || {}
 
   if (!options.message) {
-    Object.assign(options, { message: "$property '$value' already exists" })
+    Object.assign(options, { message: '$property $value already exists' })
   }
 
   const data = { model, field: property, reverse: true }

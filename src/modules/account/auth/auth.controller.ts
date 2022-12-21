@@ -1,5 +1,8 @@
-import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { Body, Controller, Delete, HttpStatus, Post, Request } from '@nestjs/common'
+import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger'
+
+import { AllowUnauthenticated } from 'src/infra/guards'
+import { RequestWithUser } from 'src/types'
 
 import {
   LoginInput,
@@ -11,36 +14,39 @@ import {
 import { LoginResponse } from './auth.dto'
 import { AuthService } from './auth.service'
 
-@ApiBearerAuth()
 @ApiTags('Account - Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly service: AuthService) {}
 
+  @AllowUnauthenticated()
+  @ApiResponse({ type: LoginResponse, status: HttpStatus.CREATED })
   @Post()
-  async login(@Body() data: LoginInput): Promise<LoginResponse> {
-    return this.service.login(data)
+  async login(@Body() body: LoginInput): Promise<LoginResponse> {
+    return this.service.login(body)
   }
 
-  @Delete(':user_id')
-  async logout(@Param('user_id') user_id: string): Promise<boolean> {
-    return this.service.logout(user_id)
+  @ApiBearerAuth()
+  @Delete()
+  async logout(@Request() req: RequestWithUser): Promise<boolean> {
+    return this.service.logout(req.user.id)
   }
 
+  @ApiBearerAuth()
   @Post('refresh_tokens')
-  async refreshTokens(@Body() data: RefreshTokenInput): Promise<TokensResponse> {
-    return this.service.refreshTokens(data)
+  async refreshTokens(@Body() body: RefreshTokenInput): Promise<TokensResponse> {
+    return this.service.refreshTokens(body.refresh_token)
   }
 
   @Post('reset_password')
-  async resetPassword(@Body() data: ResetPasswordInput): Promise<boolean> {
-    return this.service.resetPassword(data)
+  async resetPassword(@Body() body: ResetPasswordInput): Promise<boolean> {
+    return this.service.resetPassword(body)
   }
 
   @Post('send_reset_password_email')
   async sendResetPasswordEmail(
-    @Body() data: SendPasswordResetEmailInput
+    @Body() body: SendPasswordResetEmailInput
   ): Promise<boolean> {
-    return this.service.sendResetPasswordEmail(data.email)
+    return this.service.sendResetPasswordEmail(body.email)
   }
 }

@@ -1,9 +1,10 @@
 // https://stackoverflow.com/questions/58343262/class-validator-validate-array-of-objects
 
 import { ApiProperty, PartialType } from '@nestjs/swagger'
-import type { Address, Role, User } from '@prisma/client'
+import { Address, AddressType, Role, User } from '@prisma/client'
 import {
   IsEmail,
+  IsEnum,
   IsString,
   IsUUID,
   Length,
@@ -20,7 +21,7 @@ const regexMsg =
   '$property must contain at least 6 characters, 1 upper and 1 lower case letter, 1 number and special characters !#$%&?'
 
 export class CreateUserInput
-  implements Omit<User, 'id' | 'created_at' | 'updated_at'>
+  implements Omit<User, 'id' | 'roles' | 'permissions' | 'created_at' | 'updated_at'>
 {
   @ApiProperty({ example: 'John Doe' })
   @IsString()
@@ -37,20 +38,13 @@ export class CreateUserInput
   @Length(6, 30)
   @Matches(regex, { message: regexMsg })
   password: string
-
-  @ApiProperty({ example: ['CLIENT'] })
-  @IsString({ each: true })
-  roles: Role[]
-
-  @ApiProperty({ example: ['user.create', 'user.update'] })
-  @IsString({ each: true })
-  permissions: string[]
 }
 
 export class UpdateUserInput extends PartialType(CreateUserInput) {
-  @ApiProperty({ example: 'the user uuid is required' })
-  @IsUUID()
-  id: string
+  // @ApiProperty({ example: 'the user uuid is required' })
+  // @IsUUID()
+  // id: string
+  // received by request headers
 
   @ApiProperty({
     example: 'Pwd@123!',
@@ -61,13 +55,35 @@ export class UpdateUserInput extends PartialType(CreateUserInput) {
   current_password: string
 }
 
-export class CreateAddressInput
+export class UpdateUserAccessLevelInput
+  implements Pick<User, 'roles' | 'permissions'>
+{
+  @ApiProperty({
+    example: [Role.CLIENT],
+    enum: Role,
+    description: 'The roles of an user',
+  })
+  @IsEnum(Role, { each: true })
+  @ValidateIf(user => !!user.roles)
+  roles: Role[]
+  // https://www.autoscripts.net/typescript-class-validator-validate-enum-array/
+
+  @ApiProperty({ example: ['user.create', 'user.update'] })
+  @IsString({ each: true })
+  @ValidateIf(user => !!user.permissions)
+  permissions: string[]
+}
+
+export class CreateUserAddressInput
   implements Omit<Address, 'id' | 'user_id' | 'created_at' | 'updated_at'>
 {
-  @ApiProperty({ example: 'shipping' })
-  @IsString()
-  @Length(5, 40)
-  type: string
+  @ApiProperty({
+    example: AddressType.SHIPPING,
+    enum: AddressType,
+    description: 'The type of an address',
+  })
+  @IsEnum(AddressType)
+  type: AddressType
 
   @ApiProperty({ example: 'John Doe' })
   @IsString()
@@ -110,7 +126,7 @@ export class CreateAddressInput
   complement: string
 }
 
-export class UpdateAddressInput extends PartialType(CreateAddressInput) {
+export class UpdateUserAddressInput extends PartialType(CreateUserAddressInput) {
   @ApiProperty({ example: 'the address uuid is required' })
   @IsUUID()
   id: string

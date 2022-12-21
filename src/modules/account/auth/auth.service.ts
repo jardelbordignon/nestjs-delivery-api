@@ -1,12 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { resolve } from 'path'
 
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common'
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { compare } from 'bcryptjs'
 
@@ -20,7 +15,6 @@ import {
   AuthenticatedUser,
   LoginInput,
   LoginResponse,
-  RefreshTokenInput,
   ResetPasswordInput,
   TokensResponse,
 } from './auth.dto'
@@ -33,7 +27,7 @@ export class AuthService {
     private jwtService: JwtService //private mailProvider: IMailProvider
   ) {}
 
-  async handleTokens(user_id: string): Promise<LoginResponse['tokens']> {
+  private async handleTokens(user_id: string): Promise<LoginResponse['tokens']> {
     const access_token = await this.jwtService.signAsync({ sub: user_id })
 
     const daysToExpire = +process.env.JWT_REFRESH_EXPIRES_IN_DAYS
@@ -41,8 +35,12 @@ export class AuthService {
       { sub: user_id },
       { expiresIn: `${daysToExpire}d` }
     )
+
     const expires_at = new Date(Date.now() + daysToExpire * 1000 * 60 * 60 * 24)
-    await this.tokenService.create({ user_id, refresh_token, expires_at })
+
+    await this.tokenService.deleteByUserId(user_id).then(async () => {
+      await this.tokenService.create({ user_id, refresh_token, expires_at })
+    })
     return { access_token, refresh_token }
   }
 
@@ -54,10 +52,8 @@ export class AuthService {
     const user = await this.userService.findFirstByEmailWithPassword(email)
     const match = await compare(password, user.password)
     if (!match) throw new NotFoundException('User not found')
-    const isDeleted = await this.tokenService.deleteByUserId(user.id)
-    if (!isDeleted) throw new ForbiddenException('Token existing')
-
     const tokens = await this.handleTokens(user.id)
+
     return {
       user: omitProperties(user, ['password']),
       tokens,
@@ -95,12 +91,11 @@ export class AuthService {
     return true
   }
 
-  async refreshTokens(data: RefreshTokenInput): Promise<TokensResponse> {
-    const { sub } = await this.jwtService.verify(data.refresh_token)
-    const token = await this.tokenService.findFirstByRefreshToken(data.refresh_token)
+  async refreshTokens(refresh_token: string): Promise<TokensResponse> {
+    const { sub: user_id } = await this.jwtService.verify(refresh_token)
+    const token = await this.tokenService.findFirstByRefreshToken(refresh_token)
     if (!token) throw new UnauthorizedException('RefreshToken is invalid')
-    await this.logout(sub)
-    return this.handleTokens(sub)
+    return this.handleTokens(user_id)
   }
 
   async resetPassword({

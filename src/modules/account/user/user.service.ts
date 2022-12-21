@@ -11,9 +11,10 @@ import { PrismaService } from 'src/infra/prisma.service'
 import { omitProperties } from 'src/infra/utils/omit-properties'
 
 import {
-  CreateAddressInput,
+  CreateUserAddressInput,
   CreateUserInput,
-  UpdateAddressInput,
+  UpdateUserAccessLevelInput,
+  UpdateUserAddressInput,
   UpdateUserInput,
   type UserOmittedPassword,
 } from './user.dto'
@@ -21,16 +22,23 @@ import {
 @Injectable()
 export class UserService extends PrismaService {
   async create(data: CreateUserInput): Promise<UserOmittedPassword> {
-    data.password = await hash(data.password, 10)
-    const user = await this.user.create({ data })
+    const { email, name, password } = data
+    const hashedPassword = await hash(password, 10)
+    const user = await this.user.create({
+      data: { email, name, password: hashedPassword },
+    })
     return omitProperties(user, ['password'])
+  }
+
+  async delete(id: string): Promise<boolean> {
+    await this.findFirstWithPassword('id', id)
+    const userDeleted = await this.user.delete({ where: { id } })
+    return !!userDeleted
   }
 
   async findAll(): Promise<UserOmittedPassword[]> {
     const users = await this.user.findMany()
-
     const usersOmittedPassword = users.map(user => omitProperties(user, ['password']))
-
     return usersOmittedPassword
   }
 
@@ -59,25 +67,29 @@ export class UserService extends PrismaService {
     return this.user.update({ where: { id }, data: { password } })
   }
 
-  async update(
-    logged_id: string,
-    data: UpdateUserInput
-  ): Promise<UserOmittedPassword> {
-    const { id, email, name, current_password, password, permissions, roles } = data
-    if (logged_id !== id) throw new UnauthorizedException("Another user's profile")
-
+  async update(id: string, data: UpdateUserInput): Promise<UserOmittedPassword> {
+    const { email, name, current_password, password } = data
     const user = await this.user.findFirst({ where: { id } })
-
     if (email || password) {
       const match = await compare(current_password, user.password)
       if (!match) throw new UnauthorizedException('Incorrect current password')
     }
-
     const updatedUser = await this.user.update({
       where: { id },
-      data: { email, name, password, permissions, roles },
+      data: { email, name, password },
     })
+    return omitProperties(updatedUser, ['password'])
+  }
 
+  async updateAccessLevel(
+    id: string,
+    data: UpdateUserAccessLevelInput
+  ): Promise<UserOmittedPassword> {
+    const { permissions, roles } = data
+    const updatedUser = await this.user.update({
+      where: { id },
+      data: { permissions, roles },
+    })
     return omitProperties(updatedUser, ['password'])
   }
 
@@ -88,7 +100,7 @@ export class UserService extends PrismaService {
 
   async createUserAddress(
     user_id: string,
-    data: CreateAddressInput
+    data: CreateUserAddressInput
   ): Promise<Address> {
     const {
       city,
@@ -103,13 +115,10 @@ export class UserService extends PrismaService {
       street,
       type,
     } = data
-
     const alreadyExists = await this.address.findFirst({
       where: { user_id, street, number },
     })
-
     if (alreadyExists) throw new BadRequestException('Address already exists')
-
     const address = await this.address.create({
       data: {
         user_id,
@@ -126,16 +135,22 @@ export class UserService extends PrismaService {
         type,
       },
     })
-
     return address
   }
 
-  async deleteUserAddress(id: string): Promise<boolean> {
-    const deletedAddress = await this.address.delete({ where: { id } })
-    return !!deletedAddress
+  async deleteUserAddress(user_id: string, id: string): Promise<boolean> {
+    const address = await this.address.findFirst({ where: { user_id, id } })
+    if (address) {
+      const deletedAddress = await this.address.delete({ where: { id } })
+      return !!deletedAddress
+    }
+    return true
   }
 
-  async updateUserAddress(data: UpdateAddressInput): Promise<Address> {
+  async updateUserAddress(
+    user_id: string,
+    data: UpdateUserAddressInput
+  ): Promise<Address> {
     const {
       id,
       city,
@@ -150,10 +165,8 @@ export class UserService extends PrismaService {
       street,
       type,
     } = data
-
-    const addressExists = await this.address.findFirst({ where: { id } })
+    const addressExists = await this.address.findFirst({ where: { user_id, id } })
     if (!addressExists) throw new NotFoundException('Address not found')
-
     const updatedAddress = this.address.update({
       where: { id },
       data: {
@@ -170,7 +183,6 @@ export class UserService extends PrismaService {
         type,
       },
     })
-
     return updatedAddress
   }
 }
