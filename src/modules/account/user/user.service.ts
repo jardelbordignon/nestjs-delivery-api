@@ -93,9 +93,13 @@ export class UserService extends PrismaService {
     return omitProperties(updatedUser, ['password'])
   }
 
-  // Addresses
+  // User Addresses
   async findUserAddresses(user_id: string): Promise<Address[]> {
     return this.address.findMany({ where: { user_id } })
+  }
+
+  async findUserAddress(user_id: string, address_id: string): Promise<Address> {
+    return this.address.findFirst({ where: { user_id, id: address_id } })
   }
 
   async createUserAddress(

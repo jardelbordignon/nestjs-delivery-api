@@ -3,13 +3,15 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Patch,
   Post,
   Request,
   UseGuards,
 } from '@nestjs/common'
-import { ApiBearerAuth, ApiResponse, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { Role } from '@prisma/client'
 
 import { AllowUnauthenticated, AuthorizationGuard } from 'src/infra/guards'
@@ -30,22 +32,28 @@ import { UserService } from './user.service'
 export class UserController {
   constructor(private readonly service: UserService) {}
 
+  @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ description: 'A list of user whit omitted password' })
+  @HttpCode(HttpStatus.OK)
   @AllowUnauthenticated()
   @Get()
   findAll(): Promise<UserOmittedPassword[]> {
     return this.service.findAll()
   }
 
+  @ApiOperation({ summary: 'Create an user' })
   @ApiResponse({ description: 'The created user whit omitted password' })
+  @HttpCode(HttpStatus.CREATED)
   @AllowUnauthenticated()
   @Post()
   create(@Body() body: CreateUserInput): Promise<UserOmittedPassword> {
     return this.service.create(body)
   }
 
-  @ApiResponse({ description: 'The updated user whit omitted password' })
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update an user' })
+  @ApiResponse({ description: 'The updated user whit omitted password' })
+  @HttpCode(HttpStatus.OK)
   @Patch()
   update(
     @Body() body: UpdateUserInput,
@@ -54,8 +62,10 @@ export class UserController {
     return this.service.update(req.user.id, body)
   }
 
-  @ApiResponse({ description: 'The updated user access level whit omitted password' })
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update an user access level' })
+  @ApiResponse({ description: 'The updated user access level whit omitted password' })
+  @HttpCode(HttpStatus.OK)
   @UseGuards(
     AuthorizationGuard({
       roles: [Role.DELIVERYMAN, Role.CLIENT],
@@ -71,21 +81,42 @@ export class UserController {
     return this.service.updateAccessLevel(req.user.id, body)
   }
 
-  @ApiResponse({ description: 'The updated user access level whit omitted password' })
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete an user' })
+  @ApiResponse({ description: 'User delete confirmation' })
   @Delete()
   @UseGuards(AuthorizationGuard({ permissions: ['user.delete'] }))
   delete(@Request() req: RequestWithUser) {
     return this.service.delete(req.user.id)
   }
 
+  // USER ADDRESSES
+
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all user addresses' })
+  @ApiResponse({ description: 'The user addresses list' })
+  @HttpCode(HttpStatus.OK)
   @Get('addresses')
   findUserAddresses(@Request() req: RequestWithUser) {
     return this.service.findUserAddresses(req.user.id)
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get an user address' })
+  @ApiResponse({ description: 'The user address' })
+  @HttpCode(HttpStatus.OK)
+  @Get('addresses/:address_id')
+  findUserAddress(
+    @Param('address_id') address_id: string,
+    @Request() req: RequestWithUser
+  ) {
+    return this.service.findUserAddress(req.user.id, address_id)
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create an user address' })
+  @ApiResponse({ description: 'The created user address' })
+  @HttpCode(HttpStatus.OK)
   @Post('addresses')
   createUserAddress(
     @Body() body: CreateUserAddressInput,
@@ -95,6 +126,9 @@ export class UserController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete an user address' })
+  @ApiResponse({ description: 'User address delete confirmation' })
+  @HttpCode(HttpStatus.OK)
   @Delete('addresses/:address_id')
   deleteUserAddress(
     @Param('address_id') address_id: string,
@@ -104,6 +138,9 @@ export class UserController {
   }
 
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update an user address' })
+  @ApiResponse({ description: 'User address update confirmation' })
+  @HttpCode(HttpStatus.OK)
   @Patch('addresses')
   updateUserAddress(
     @Body() body: UpdateUserAddressInput,

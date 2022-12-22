@@ -10,11 +10,13 @@
   },
   "material-icon-theme.activeIconPack": "nest",
   "material-icon-theme.files.associations": {
-    "*.dto.ts": "Nest-resolver"
+    "*.dto.ts": "Nest-resolver",
+    "*.repository.ts": "Database"
   },
   "material-icon-theme.folders.associations": {
     "requests": "Connection",
     "infra": "Tools",
-    "account": "Secure"
+    "account": "Secure",
+    "repository": "Database"
   }
 }

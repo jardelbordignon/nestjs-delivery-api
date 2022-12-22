@@ -15,10 +15,10 @@ content-type: application/json
 ###
 PATCH http://localhost:3000/users
 content-type: application/json
+Authorization: token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1NzI4YWQ2ZC1hZDVhLTRkODMtODZhYy00OTk3MjIyOTM2NDEiLCJpYXQiOjE2NzEzNTgwMTksImV4cCI6MTY3MTQ0NDQxOX0.UAFngyY6shT1lKI8vud8DINBRWqheY66m7ikLF82XDQ
 
 {
-  "id": "90e39d77-aa37-4d48-adf6-1cbc196c2af4",
-  "email": "jardel@email.com",
+  "email": "jardel@email.com.br",
   "currentPassword": "Pwd123!"
 }
 

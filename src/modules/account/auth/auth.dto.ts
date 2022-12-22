@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsEmail, IsJWT, IsString, IsUUID, Length, Matches } from 'class-validator'
 
-import type { UserOmittedPassword } from '../user/user.dto'
+import { UserOmittedPassword } from '../user/user.dto'
 
 export type AuthenticatedUser = Pick<UserOmittedPassword, 'id' | 'email'>
 
@@ -56,7 +56,7 @@ export class SendPasswordResetEmailInput {
 }
 
 export class RefreshTokenInput {
-  @ApiProperty({ example: 'the-current-jwt-refreshToken' })
+  @ApiProperty({ example: 'the-current-jwt-refresh-token' })
   @IsJWT()
   refresh_token: string
 }
