@@ -1,22 +1,16 @@
-import { Logger, ValidationPipe } from '@nestjs/common'
-import { NestFactory, Reflector } from '@nestjs/core'
+import { Logger } from '@nestjs/common'
+import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import { useContainer } from 'class-validator'
 
 import { AppModule } from './app/app.module'
-import { AuthenticationGuard } from './infra/guards'
+import { mainConfig } from './main.config'
 
 const PORT = 3000
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
 
-  app.enableCors({ allowedHeaders: '*', origin: '*' })
-
-  useContainer(app.select(AppModule), { fallbackOnErrors: true })
-
-  app.useGlobalPipes(new ValidationPipe())
-  app.useGlobalGuards(new AuthenticationGuard(app.get(Reflector)))
+  mainConfig(app)
 
   const config = new DocumentBuilder()
     .setTitle('Delivery')

@@ -1,0 +1,11 @@
+Tipos de testes
+
+Unitários - Testam um componente/funcionalidade de forma isolada.
+Integração - Testam um ou mais componentes/funcionalidades que tem alguma ligação.
+E2E - Testa fluxos da aplicação simulando ações de um usuário.
+
+Uso de banco de dados
+
+Unitários - Não
+Integração - Talvez
+E2E - Sim (inclusive usa qualquer conexão externa, é como se fosse uma ação do usuário, evitar uso de mocks ou dados fakes).
