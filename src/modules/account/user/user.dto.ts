@@ -23,17 +23,21 @@ const regexMsg =
 export class CreateUserInput
   implements Omit<User, 'id' | 'roles' | 'permissions' | 'created_at' | 'updated_at'>
 {
-  @ApiProperty({ example: 'John Doe' })
+  @ApiProperty({ description: 'The user name', example: 'John Doe' })
   @IsString()
   @Length(5, 40)
   name: string
 
-  @ApiProperty({ example: 'john-doe@email.com' })
+  @ApiProperty({ description: 'The user email', example: 'john-doe@email.com' })
   @IsEmail()
   @IsUnique({ model: 'User' })
   email: string
 
-  @ApiProperty({ example: 'Pwd@123!', writeOnly: true })
+  @ApiProperty({
+    description: 'The user password',
+    example: 'Pwd@123!',
+    writeOnly: true,
+  })
   @IsString()
   @Length(6, 30)
   @Matches(regex, { message: regexMsg })
@@ -47,28 +51,31 @@ export class UpdateUserInput extends PartialType(CreateUserInput) {
   // received by request headers
 
   @ApiProperty({
+    description: 'The current user password, required to update email or password',
     example: 'Pwd@123!',
-    description: 'required to update email or password',
   })
   @IsString()
   @ValidateIf(user => !!user.email || !!user.password)
-  current_password: string
+  current_password?: string
 }
 
 export class UpdateUserAccessLevelInput
   implements Pick<User, 'roles' | 'permissions'>
 {
   @ApiProperty({
+    description: 'The user roles',
     example: [Role.CLIENT],
     enum: Role,
-    description: 'The roles of an user',
   })
   @IsEnum(Role, { each: true })
   @ValidateIf(user => !!user.roles)
   roles: Role[]
   // https://www.autoscripts.net/typescript-class-validator-validate-enum-array/
 
-  @ApiProperty({ example: ['user.create', 'user.update'] })
+  @ApiProperty({
+    description: 'The user permissions',
+    example: ['user.create', 'user.update'],
+  })
   @IsString({ each: true })
   @ValidateIf(user => !!user.permissions)
   permissions: string[]

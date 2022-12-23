@@ -7,18 +7,13 @@ import { Client } from 'pg'
 
 dotenv.config()
 
-function execSync(command) {
-  return new Promise(function (resolve, reject) {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        reject(error)
-        return
-      }
-
+const execSync = command =>
+  new Promise(function (resolve, reject) {
+    exec(command, (error, stdout) => {
+      if (error) return reject(error)
       resolve(stdout.trim())
     })
   })
-}
 
 const removeAfterLastSlash = (str: string) => str.substring(0, str.lastIndexOf('/'))
 

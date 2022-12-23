@@ -8,6 +8,6 @@ export default {
   testEnvironment: './prisma/test-environment.ts',
 
   testRegex: '.*\\.spec\\.ts$',
-  collectCoverageFrom: ['**/*.controller.(t|j)s'],
-  coverageDirectory: '../coverage',
+  collectCoverageFrom: ['src/**/*.controller.(t|j)s'],
+  coverageDirectory: './coverage',
 }
