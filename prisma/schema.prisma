@@ -23,15 +23,17 @@ enum AddressType {
 
 // ACCOUNT
 model User {
-  id          String    @id @default(uuid())
+  id          String       @id @default(uuid())
   name        String
-  email       String    @unique
+  email       String       @unique
   password    String
-  roles       Role[]    @default([CLIENT])
+  roles       Role[]       @default([CLIENT])
   permissions String[]
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
   addresses   Address[]
+  deliveryman Deliveryman?
+  deliveries  Delivery[]
 
   @@map("users")
 }
@@ -64,4 +66,31 @@ model Address {
   updated_at   DateTime    @updatedAt
 
   @@map("addresses")
+}
+
+model Deliveryman {
+  id           String     @id @default(uuid())
+  user_id      String     @unique
+  user         User       @relation(fields: [user_id], references: [id])
+  profile_name String
+  available    Boolean
+  deliveries   Delivery[]
+  created_at   DateTime   @default(now())
+
+  @@map("deliverymen")
+}
+
+model Delivery {
+  id             String      @id @default(uuid())
+  client_id      String
+  client         User        @relation(fields: [client_id], references: [id])
+  deliveryman_id String
+  deliveryman    Deliveryman @relation(fields: [deliveryman_id], references: [id])
+  title          String
+  description    String
+  delivered_at   DateTime
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+
+  @@map("deliveries")
 }
