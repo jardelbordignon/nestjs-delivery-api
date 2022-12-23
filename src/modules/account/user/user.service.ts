@@ -4,7 +4,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common'
-import type { Address, User } from '@prisma/client'
+import { Address, Deliveryman, Role, User } from '@prisma/client'
 import { compare, hash } from 'bcryptjs'
 
 import { PrismaService } from 'src/infra/prisma.service'
@@ -188,5 +188,15 @@ export class UserService extends PrismaService {
       },
     })
     return updatedAddress
+  }
+
+  async createUserDeliverymanProfile(
+    user_id: string,
+    profile_name: string
+  ): Promise<Deliveryman> {
+    const user = await this.user.findFirst({ where: { id: user_id } })
+    const roles = user.roles ? [...user.roles, Role.DELIVERYMAN] : [Role.DELIVERYMAN]
+    await this.user.update({ where: { id: user_id }, data: { roles } })
+    return this.deliveryman.create({ data: { user_id, profile_name } })
   }
 }

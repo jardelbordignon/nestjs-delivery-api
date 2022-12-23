@@ -19,6 +19,7 @@ import { RequestWithUser } from 'src/types'
 
 import {
   CreateUserAddressInput,
+  CreateUserDeliverymanProfileInput,
   CreateUserInput,
   UpdateUserAccessLevelInput,
   UpdateUserAddressInput,
@@ -69,8 +70,8 @@ export class UserController {
   @UseGuards(
     AuthorizationGuard({
       roles: [Role.DELIVERYMAN, Role.CLIENT],
-      permissions: ['user.access_level', 'user.test', 'user.upgrade'],
-      needAllPermissions: true,
+      //permissions: ['user.access_level', 'user.test', 'user.upgrade'],
+      //needAllPermissions: true,
     })
   )
   @Patch('access_level')
@@ -147,5 +148,17 @@ export class UserController {
     @Request() req: RequestWithUser
   ) {
     return this.service.updateUserAddress(req.user.id, body)
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create an user deliveryman profile' })
+  @ApiResponse({ description: 'The created user deliveryman profile' })
+  @HttpCode(HttpStatus.OK)
+  @Post('deliveryman_profile')
+  createUserDeliverymanProfile(
+    @Body() body: CreateUserDeliverymanProfileInput,
+    @Request() req: RequestWithUser
+  ) {
+    return this.service.createUserDeliverymanProfile(req.user.id, body.profile_name)
   }
 }

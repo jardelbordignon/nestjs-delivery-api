@@ -1,7 +1,7 @@
 // https://stackoverflow.com/questions/58343262/class-validator-validate-array-of-objects
 
 import { ApiProperty, PartialType } from '@nestjs/swagger'
-import { Address, AddressType, Role, User } from '@prisma/client'
+import { Address, AddressType, Deliveryman, Role, User } from '@prisma/client'
 import {
   IsEmail,
   IsEnum,
@@ -137,4 +137,13 @@ export class UpdateUserAddressInput extends PartialType(CreateUserAddressInput) 
   @ApiProperty({ example: 'the address uuid is required' })
   @IsUUID()
   id: string
+}
+
+export class CreateUserDeliverymanProfileInput
+  implements Pick<Deliveryman, 'profile_name'>
+{
+  @ApiProperty({ description: 'The deliveryman nickname', example: 'The Fash' })
+  @IsString()
+  @Length(5, 30)
+  profile_name: string
 }
